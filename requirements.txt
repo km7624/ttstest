@@ -1,0 +1,10 @@
+# requirements.txt
+fastapi
+uvicorn
+pydub
+transformers==4.36.2
+TTS==0.22.0
+torch==2.1.2
+torchaudio==2.1.2
+Jinja2
+python-multipart

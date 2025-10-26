@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>XTTS-v2 음성 생성기</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+        input, button { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        audio { width: 100%; }
+        #loader { display: none; }
+    </style>
+</head>
+<body>
+    <h1>XTTS-v2 음성 생성</h1>
+    <form id="tts-form">
+        <label for="text">변환할 텍스트:</label>
+        <input type="text" id="text" name="text" required>
+        
+        <label for="speaker_wav">목소리 샘플 (WAV 파일):</label>
+        <input type="file" id="speaker_wav" name="speaker_wav" accept=".wav" required>
+        
+        <button type="submit">음성 생성하기</button>
+    </form>
+    
+    <div id="loader">생성 중...</div>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('tts-form').addEventListener('submit', async (event) => {
+            event.preventDefault(); // 폼 기본 제출 방지
+
+            const form = event.target;
+            const formData = new FormData(form);
+            const loader = document.getElementById('loader');
+            const resultDiv = document.getElementById('result');
+
+            loader.style.display = 'block';
+            resultDiv.innerHTML = '';
+
+            try {
+                // 같은 서버의 /generate-speech/ API로 POST 요청
+                const response = await fetch('/generate-speech/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const audioUrl = URL.createObjectURL(blob);
+                    resultDiv.innerHTML = `<p>성공!</p><audio controls src="${audioUrl}"></audio>`;
+                } else {
+                    const error = await response.json();
+                    resultDiv.innerHTML = `<p>오류: ${error.detail}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p>네트워크 오류: ${error.message}</p>`;
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
